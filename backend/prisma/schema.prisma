@@ -33,6 +33,15 @@ model User {
   updatedAt      DateTime  @updatedAt
 }
 
+model Settings {
+  id           String   @id @default("global")
+  depotName    String?
+  currency     String   @default("USD ($)")
+  distanceUnit String   @default("Kilometers (km)")
+  rbac         Json?
+  updatedAt    DateTime @updatedAt
+}
+
 model Vehicle {
   id        String        @id @default(cuid())
   regNo     String        @unique
@@ -44,6 +53,8 @@ model Vehicle {
   status    VehicleStatus @default(AVAILABLE)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+  fuelLogs  FuelLog[]
+  expenses  Expense[]
 }
 
 enum DriverStatus {

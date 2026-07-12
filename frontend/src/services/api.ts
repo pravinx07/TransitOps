@@ -5,17 +5,9 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  // Try to get token from wherever AuthContext stores it, or local storage.
-  const authData = localStorage.getItem('auth');
-  if (authData) {
-    try {
-      const { token } = JSON.parse(authData);
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    } catch {
-      // Ignore
-    }
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
