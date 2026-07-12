@@ -5,6 +5,7 @@ import authRoutes from "./modules/auth/auth.routes";
 import vehicleRoutes from "./modules/vehicles/vehicles.routes";
 import driversRoutes from "./modules/drivers/drivers.routes";
 import settingsRoutes from "./modules/settings/settings.routes";
+import financeRoutes from "./modules/finance/finance.routes";
 import { sendError } from "./utils/apiResponse";
 
 // Load environment variables
@@ -22,6 +23,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/drivers", driversRoutes);
 app.use("/api/settings", settingsRoutes);
+app.use("/api/finance", financeRoutes);
 
 // Test Route
 app.get("/health", (req, res) => {
