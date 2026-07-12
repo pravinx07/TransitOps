@@ -82,7 +82,42 @@ export default function AnalyticsPage() {
   };
 
   if (loading) {
-    return <div className="text-white flex items-center justify-center h-full">Loading analytics...</div>;
+    return (
+      <div className="space-y-6 animate-pulse">
+        <div className="flex justify-between items-center">
+          <div className="h-8 w-48 bg-[#1E2336] rounded"></div>
+          <div className="h-10 w-32 bg-[#1E2336] rounded"></div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-[#131826] border border-[#1E2336] p-6 rounded-2xl h-32">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-[#1E2336] rounded-xl"></div>
+                <div className="space-y-3">
+                  <div className="h-4 w-24 bg-[#1E2336] rounded"></div>
+                  <div className="h-6 w-16 bg-[#1E2336] rounded"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="bg-[#131826] border border-[#1E2336] rounded-2xl overflow-hidden mt-8 h-64">
+          <div className="px-6 py-5 border-b border-[#1E2336]">
+            <div className="h-6 w-48 bg-[#1E2336] rounded"></div>
+          </div>
+          <div className="p-6 space-y-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex justify-between">
+                <div className="h-6 w-1/4 bg-[#1E2336] rounded"></div>
+                <div className="h-6 w-1/6 bg-[#1E2336] rounded"></div>
+                <div className="h-6 w-1/6 bg-[#1E2336] rounded"></div>
+                <div className="h-6 w-1/6 bg-[#1E2336] rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
