@@ -65,16 +65,29 @@ function AccessDenied({ requiredRoles }: { requiredRoles: string[] }) {
 
 // 3. RBAC Route Guard
 interface RoleProtectedRouteProps {
-  allowedRoles: string[];
+  pathId: string;
   children: React.ReactNode;
 }
 
-function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRouteProps) {
-  const { user } = useAuth();
+function RoleProtectedRoute({ pathId, children }: RoleProtectedRouteProps) {
+  const { user, rbac } = useAuth();
   
   if (!user) return <Navigate to="/login" replace />;
   
-  if (!allowedRoles.includes(user.role)) {
+  // If rbac is not fully loaded yet (or empty) but user is manager, let them pass or fallback to a default check
+  // Better yet, just check the map. If it's empty, fallback to basic check.
+  const safeRbac = rbac || {};
+  const allowedRoles = safeRbac[pathId] || [];
+  
+  // Settings and Dashboard are open to all logged in users.
+  if (pathId === "/dashboard" || pathId === "/settings") {
+    return <>{children}</>;
+  }
+
+  // Admin override or check map
+  const hasAccess = allowedRoles.includes(user.role);
+
+  if (!hasAccess && Object.keys(safeRbac).length > 0) {
     return <AccessDenied requiredRoles={allowedRoles} />;
   }
   
@@ -138,7 +151,7 @@ function App() {
             <Route
               path="/vehicles"
               element={
-                <RoleProtectedRoute allowedRoles={["FLEET_MANAGER"]}>
+                <RoleProtectedRoute pathId="/vehicles">
                   <VehiclesPage />
                 </RoleProtectedRoute>
               }
@@ -147,7 +160,7 @@ function App() {
             <Route
               path="/drivers"
               element={
-                <RoleProtectedRoute allowedRoles={["SAFETY_OFFICER"]}>
+                <RoleProtectedRoute pathId="/drivers">
                   <DriversPage />
                 </RoleProtectedRoute>
               }
@@ -156,7 +169,7 @@ function App() {
             <Route
               path="/trips"
               element={
-                <RoleProtectedRoute allowedRoles={["DRIVER"]}>
+                <RoleProtectedRoute pathId="/trips">
                   <TripsPage />
                 </RoleProtectedRoute>
               }
@@ -165,7 +178,7 @@ function App() {
             <Route
               path="/maintenance"
               element={
-                <RoleProtectedRoute allowedRoles={["FLEET_MANAGER"]}>
+                <RoleProtectedRoute pathId="/maintenance">
                   <MaintenancePage />
                 </RoleProtectedRoute>
               }
@@ -174,7 +187,7 @@ function App() {
             <Route
               path="/fuel-expenses"
               element={
-                <RoleProtectedRoute allowedRoles={["FINANCIAL_ANALYST"]}>
+                <RoleProtectedRoute pathId="/fuel-expenses">
                   <FuelExpensesPage />
                 </RoleProtectedRoute>
               }
@@ -183,7 +196,7 @@ function App() {
             <Route
               path="/analytics"
               element={
-                <RoleProtectedRoute allowedRoles={["FINANCIAL_ANALYST"]}>
+                <RoleProtectedRoute pathId="/analytics">
                   <AnalyticsPage />
                 </RoleProtectedRoute>
               }

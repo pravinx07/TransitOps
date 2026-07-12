@@ -5,6 +5,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   loading: boolean;
+  rbac: Record<string, string[]>;
   login: (email: string, password: string, role: Role) => Promise<{ success: boolean; message?: string; errors?: Record<string, string> }>;
   logout: () => void;
 }
@@ -15,12 +16,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [rbac, setRbac] = useState<Record<string, string[]>>({});
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setToken(null);
     setUser(null);
+    setRbac({});
   };
 
   useEffect(() => {
@@ -33,26 +36,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setToken(storedToken);
           setUser(JSON.parse(storedUser));
           
-          // Verify with backend
           const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
-          const res = await fetch(`${apiUrl}/auth/me`, {
-            headers: {
-              Authorization: `Bearer ${storedToken}`,
-            },
-          });
           
-          if (!res.ok) {
-            // Token expired or invalid
+          // Verify with backend and fetch settings in parallel
+          const [authRes, settingsRes] = await Promise.all([
+            fetch(`${apiUrl}/auth/me`, {
+              headers: { Authorization: `Bearer ${storedToken}` },
+            }),
+            fetch(`${apiUrl}/settings`, {
+              headers: { Authorization: `Bearer ${storedToken}` },
+            })
+          ]);
+          
+          if (!authRes.ok) {
             logout();
           } else {
-            const data = await res.json();
-            if (data.success) {
-              setUser(data.data);
-              localStorage.setItem("user", JSON.stringify(data.data));
+            const authData = await authRes.json();
+            if (authData.success) {
+              setUser(authData.data);
+              localStorage.setItem("user", JSON.stringify(authData.data));
+            }
+            
+            if (settingsRes.ok) {
+              const settingsData = await settingsRes.json();
+              if (settingsData.success && settingsData.data?.rbac) {
+                setRbac(typeof settingsData.data.rbac === 'string' ? JSON.parse(settingsData.data.rbac) : settingsData.data.rbac);
+              }
             }
           }
         } catch (error) {
-          console.error("Auth init error:", error);
+          console.error("Auth initialization error:", error);
           logout();
         }
       }
@@ -98,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, rbac, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

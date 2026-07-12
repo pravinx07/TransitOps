@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import authRoutes from "./modules/auth/auth.routes";
 import vehicleRoutes from "./modules/vehicles/vehicles.routes";
 import driversRoutes from "./modules/drivers/drivers.routes";
+import settingsRoutes from "./modules/settings/settings.routes";
 import { sendError } from "./utils/apiResponse";
 
 // Load environment variables
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/drivers", driversRoutes);
+app.use("/api/settings", settingsRoutes);
 
 // Test Route
 app.get("/health", (req, res) => {
