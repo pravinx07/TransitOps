@@ -18,7 +18,28 @@ enum VehicleStatus {
   AVAILABLE
   ON_TRIP
   IN_SHOP
+  IN_MAINTENANCE
   RETIRED
+}
+
+enum DriverStatus {
+  AVAILABLE
+  ON_TRIP
+  ON_LEAVE
+  OFF_DUTY
+  SUSPENDED
+}
+
+enum TripStatus {
+  DRAFT
+  DISPATCHED
+  COMPLETED
+  CANCELLED
+}
+
+enum MaintenanceStatus {
+  ACTIVE
+  COMPLETED
 }
 
 model User {
@@ -43,27 +64,26 @@ model Settings {
 }
 
 model Vehicle {
-  id        String        @id @default(cuid())
-  regNo     String        @unique
-  model     String
-  type      String
-  capacity  String
-  odometer  Int
-  avgCost   Int
-  status    VehicleStatus @default(AVAILABLE)
-  region    String        @default("North")
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  fuelLogs  FuelLog[]
-  expenses  Expense[]
-}
+  id          String        @id @default(cuid())
+  regNo       String?       @unique
+  plateNumber String?       @unique
+  make        String?
+  model       String
+  type        String?
+  capacity    String?
+  capacityKg  Float?
+  odometer    Int?
+  avgCost     Int?
+  status      VehicleStatus @default(AVAILABLE)
+  region      String        @default("North")
+  
+  trips        Trip[]
+  maintenances Maintenance[]
+  fuelLogs     FuelLog[]
+  expenses     Expense[]
 
-enum DriverStatus {
-  AVAILABLE
-  ON_TRIP
-  ON_LEAVE
-  OFF_DUTY
-  SUSPENDED
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model Driver {
@@ -75,38 +95,65 @@ model Driver {
   contactNumber   String
   safetyScore     Float        @default(100)
   status          DriverStatus @default(AVAILABLE)
+  trips           Trip[]
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
+}
+
+model Trip {
+  id              String     @id @default(cuid())
+  tripNumber      String     @unique
+  source          String
+  destination     String
+  cargoWeight     Float
+  plannedDistance Float
+  status          TripStatus @default(DRAFT)
+  
+  vehicleId       String?
+  vehicle         Vehicle?   @relation(fields: [vehicleId], references: [id])
+  
+  driverId        String?
+  driver          Driver?    @relation(fields: [driverId], references: [id])
+
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model Maintenance {
+  id          String            @id @default(cuid())
+  serviceType String
+  cost        Float
+  date        DateTime
+  status      MaintenanceStatus @default(ACTIVE)
+  
+  vehicleId   String
+  vehicle     Vehicle           @relation(fields: [vehicleId], references: [id])
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 }
 
 model FuelLog {
   id        String   @id @default(cuid())
   vehicleId String
-  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id])
   date      DateTime
   liters    Float
   fuelCost  Float
   notes     String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-enum ExpenseStatus {
-  PENDING
-  AVAILABLE
-  COMPLETED
 }
 
 model Expense {
-  id          String        @id @default(cuid())
-  tripRef     String
-  vehicleId   String
-  vehicle     Vehicle       @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
-  toll        Float         @default(0)
-  other       Float         @default(0)
-  maintenance Float         @default(0)
-  status      ExpenseStatus @default(PENDING)
+  id          String   @id @default(cuid())
+  tripRef     String?
+  vehicleId   String?
+  vehicle     Vehicle? @relation(fields: [vehicleId], references: [id])
+  toll        Float    @default(0)
+  other       Float    @default(0)
+  maintenance Float    @default(0)
+  status      String   @default("PENDING")
   notes       String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

@@ -8,6 +8,9 @@ import settingsRoutes from "./modules/settings/settings.routes";
 import financeRoutes from "./modules/finance/finance.routes";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes";
 import analyticsRoutes from "./modules/analytics/analytics.routes";
+import tripsRoutes from "./modules/trips/trips.routes";
+import vehiclesRoutes from "./modules/vehicles/vehicles.routes";
+import maintenanceRoutes from "./modules/maintenance/maintenance.routes";
 import { sendError } from "./utils/apiResponse";
 
 // Load environment variables
@@ -28,6 +31,9 @@ app.use("/api/settings", settingsRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/trips", tripsRoutes);
+app.use("/api/vehicles", vehiclesRoutes);
+app.use("/api/maintenance", maintenanceRoutes);
 
 // Test Route
 app.get("/health", (req, res) => {

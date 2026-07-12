@@ -12,7 +12,7 @@ import MaintenancePage from './pages/MaintenancePage';
 import FuelExpensesPage from './pages/FuelExpensesPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import SettingsPage from './pages/SettingsPage';
-import { Lock } from 'lucide-react';
+import { Lock, Menu, X, Truck } from 'lucide-react';
 
 // 1. Session Protection Route Wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
