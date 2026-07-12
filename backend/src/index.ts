@@ -7,6 +7,7 @@ import driversRoutes from "./modules/drivers/drivers.routes";
 import settingsRoutes from "./modules/settings/settings.routes";
 import financeRoutes from "./modules/finance/finance.routes";
 import dashboardRoutes from "./modules/dashboard/dashboard.routes";
+import analyticsRoutes from "./modules/analytics/analytics.routes";
 import { sendError } from "./utils/apiResponse";
 
 // Load environment variables
@@ -26,6 +27,7 @@ app.use("/api/drivers", driversRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // Test Route
 app.get("/health", (req, res) => {

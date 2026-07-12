@@ -1,241 +1,201 @@
-import React, { useEffect, useState } from 'react';
-import { fetchDashboardMetrics } from '../services/api';
-import { Download, TrendingUp, Activity, DollarSign, Droplets } from 'lucide-react';
+import { useMinimumLoading } from "../hooks/useMinimumLoading";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Download, Loader2 } from "lucide-react";
+import { fetchAnalytics } from "../services/api";
 
-interface VehicleMetric {
-  id: string;
-  plateNumber: string;
-  make: string;
-  model: string;
-  status: string;
-  fuelEfficiency: number;
-  operationalCost: number;
-  roi: number;
-  distance: number;
-  revenue: number;
-}
-
-interface AggregateMetrics {
-  fuelEfficiency: number;
-  utilization: number;
-  operationalCost: number;
-  roi: number;
-}
 
 export default function AnalyticsPage() {
-  const [aggregate, setAggregate] = useState<AggregateMetrics | null>(null);
-  const [vehicles, setVehicles] = useState<VehicleMetric[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: analytics, isLoading, isError } = useQuery({
+    queryKey: ['analyticsData'],
+    queryFn: fetchAnalytics,
+    refetchInterval: 30000
+  });
 
-  useEffect(() => {
-    fetchDashboardMetrics()
-      .then((data) => {
-        setAggregate(data.aggregate);
-        setVehicles(data.vehicles);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error loading metrics:", error);
-        setLoading(false);
-      });
-  }, []);
+  const showLoading = useMinimumLoading(isLoading, 800);
 
-  const downloadCSV = () => {
-    if (vehicles.length === 0) return;
-    const headers = [
-      "Plate Number",
-      "Make",
-      "Model",
-      "Status",
-      "Distance (km)",
-      "Revenue ($)",
-      "Fuel Efficiency (km/L)",
-      "Operational Cost ($)",
-      "ROI (%)"
+  const handleExportCSV = () => {
+    if (!analytics) return;
+
+    // Build CSV content
+    const headers = ["Metric", "Value"];
+    const rows = [
+      ["Fuel Efficiency (km/l)", analytics.fuelEfficiency],
+      ["Fleet Utilization (%)", analytics.fleetUtilization],
+      ["Operational Cost", analytics.operationalCost],
+      ["Vehicle ROI (%)", analytics.roi],
     ];
 
-    const rows = vehicles.map((v) => [
-      v.plateNumber,
-      v.make,
-      v.model,
-      v.status,
-      v.distance.toFixed(2),
-      v.revenue.toFixed(2),
-      v.fuelEfficiency.toFixed(2),
-      v.operationalCost.toFixed(2),
-      v.roi.toFixed(2)
-    ]);
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += headers.join(",") + "\n";
+    rows.forEach(row => {
+      csvContent += row.join(",") + "\n";
+    });
 
-    const csvContent = [
-      headers.join(","),
-      ...rows.map(e => e.join(","))
-    ].join("\n");
+    csvContent += "\nTop Costliest Vehicles\n";
+    csvContent += "Reg No,Model,Total Cost\n";
+    analytics.costliestVehicles.forEach((v: any) => {
+      csvContent += `${v.regNo},${v.model},${v.totalCost}\n`;
+    });
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
+    const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "vehicle_metrics.csv");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "TransitOps_Analytics.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  if (loading) {
+  if (showLoading) {
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="flex justify-between items-center">
-          <div className="h-8 w-48 bg-[#1E2336] rounded"></div>
-          <div className="h-10 w-32 bg-[#1E2336] rounded"></div>
+      <div className="space-y-6 font-sans animate-pulse pb-10">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#1E2336]">
+          <div><div className="h-6 w-48 bg-[#1E2336] rounded mb-2"></div><div className="h-4 w-32 bg-[#1E2336] rounded"></div></div>
+          <div className="h-8 w-24 bg-[#1E2336] rounded"></div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-[#131826] border border-[#1E2336] p-6 rounded-2xl h-32">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[#1E2336] rounded-xl"></div>
-                <div className="space-y-3">
-                  <div className="h-4 w-24 bg-[#1E2336] rounded"></div>
-                  <div className="h-6 w-16 bg-[#1E2336] rounded"></div>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <div key={i} className="h-24 bg-[#0A0C16] border border-[#1E2336] rounded-xl"></div>)}
         </div>
-        <div className="bg-[#131826] border border-[#1E2336] rounded-2xl overflow-hidden mt-8 h-64">
-          <div className="px-6 py-5 border-b border-[#1E2336]">
-            <div className="h-6 w-48 bg-[#1E2336] rounded"></div>
-          </div>
-          <div className="p-6 space-y-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex justify-between">
-                <div className="h-6 w-1/4 bg-[#1E2336] rounded"></div>
-                <div className="h-6 w-1/6 bg-[#1E2336] rounded"></div>
-                <div className="h-6 w-1/6 bg-[#1E2336] rounded"></div>
-                <div className="h-6 w-1/6 bg-[#1E2336] rounded"></div>
-              </div>
-            ))}
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="h-64 bg-[#0A0C16] border border-[#1E2336] rounded-xl"></div>
+          <div className="h-64 bg-[#0A0C16] border border-[#1E2336] rounded-xl"></div>
         </div>
       </div>
     );
   }
 
+  if (isError || !analytics) {
+    return (
+      <div className="flex h-full items-center justify-center text-red-400 text-sm font-semibold">
+        Failed to load analytics data.
+      </div>
+    );
+  }
+
+  // Find max expense for bar chart scaling, handle potential cached query schema differences
+  const expensesArray = analytics.monthlyExpenses || analytics.monthlyRevenue || [];
+  const maxExpense = Math.max(...(expensesArray.map((m: any) => m.cost || m.revenue || 0)), 10);
+
+  // Find max cost for vehicle cost scaling
+  const vehiclesArray = analytics.costliestVehicles || [];
+  const maxCost = Math.max(...(vehiclesArray.map((v: any) => v.totalCost || 0)), 10);
+
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-white tracking-tight">Analytics</h1>
-        <button
-          onClick={downloadCSV}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-        >
-          <Download className="w-4 h-4" />
-          Export CSV
-        </button>
+    <div className="space-y-6 font-sans animate-in fade-in duration-300 pb-10">
+      
+      {/* Standardized Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#1E2336]">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Reports & Analytics</h1>
+          <p className="text-xs text-gray-500 mt-1">Real-time performance insights and cost tracking</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Range: YTD</span>
+          <button 
+            onClick={handleExportCSV}
+            className="flex items-center gap-1.5 bg-[#4F46E5]/20 text-[#818CF8] border border-[#4F46E5]/30 px-3 py-1.5 rounded-md text-[10px] uppercase font-bold tracking-wider hover:bg-[#4F46E5]/30 transition ml-2"
+          >
+            <Download className="w-3 h-3" />
+            Export CSV
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-[#131826] border border-[#1E2336] p-6 rounded-2xl shadow-sm hover:border-blue-500/30 transition-colors group">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-500/10 rounded-xl group-hover:scale-110 transition-transform">
-              <Droplets className="w-6 h-6 text-blue-400" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-400 font-medium">Fuel Efficiency</p>
-              <h3 className="text-2xl font-bold text-white mt-1">
-                {aggregate?.fuelEfficiency.toFixed(2)} <span className="text-sm font-normal text-gray-500">km/L</span>
-              </h3>
-            </div>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Fuel Efficiency */}
+        <div className="bg-[#0A0C16]/50 border border-[#1E2336] p-5 rounded-xl border-t-2 border-t-[#059669] flex flex-col justify-between h-28">
+          <span className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Fuel Efficiency</span>
+          <div className="flex items-baseline space-x-1">
+            <span className="text-3xl font-extrabold text-white">{analytics.fuelEfficiency}</span>
+            <span className="text-xs text-gray-400 font-medium">km/l</span>
           </div>
         </div>
 
-        <div className="bg-[#131826] border border-[#1E2336] p-6 rounded-2xl shadow-sm hover:border-emerald-500/30 transition-colors group">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-emerald-500/10 rounded-xl group-hover:scale-110 transition-transform">
-              <Activity className="w-6 h-6 text-emerald-400" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-400 font-medium">Fleet Utilization</p>
-              <h3 className="text-2xl font-bold text-white mt-1">
-                {aggregate?.utilization.toFixed(1)}<span className="text-lg">%</span>
-              </h3>
-            </div>
+        {/* Fleet Utilization */}
+        <div className="bg-[#0A0C16]/50 border border-[#1E2336] p-5 rounded-xl flex flex-col justify-between h-28">
+          <span className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Fleet Utilization</span>
+          <div className="flex items-baseline space-x-1">
+            <span className="text-3xl font-extrabold text-white">{analytics.fleetUtilization}%</span>
           </div>
         </div>
 
-        <div className="bg-[#131826] border border-[#1E2336] p-6 rounded-2xl shadow-sm hover:border-rose-500/30 transition-colors group">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-rose-500/10 rounded-xl group-hover:scale-110 transition-transform">
-              <DollarSign className="w-6 h-6 text-rose-400" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-400 font-medium">Operational Cost</p>
-              <h3 className="text-2xl font-bold text-white mt-1">
-                <span className="text-lg">$</span>{aggregate?.operationalCost.toLocaleString()}
-              </h3>
-            </div>
+        {/* Operational Cost */}
+        <div className="bg-[#0A0C16]/50 border border-[#1E2336] p-5 rounded-xl border-l-2 border-l-[#F97316] flex flex-col justify-between h-28">
+          <span className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Operational Cost</span>
+          <div className="flex items-baseline space-x-1">
+            <span className="text-3xl font-extrabold text-white">{analytics.operationalCost.toLocaleString()}</span>
           </div>
         </div>
 
-        <div className="bg-[#131826] border border-[#1E2336] p-6 rounded-2xl shadow-sm hover:border-purple-500/30 transition-colors group">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-purple-500/10 rounded-xl group-hover:scale-110 transition-transform">
-              <TrendingUp className="w-6 h-6 text-purple-400" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-400 font-medium">Vehicle ROI</p>
-              <h3 className="text-2xl font-bold text-white mt-1">
-                {aggregate?.roi.toFixed(2)}<span className="text-lg">%</span>
-              </h3>
-            </div>
+        {/* Vehicle ROI */}
+        <div className="bg-[#0A0C16]/50 border border-[#1E2336] p-5 rounded-xl border-l-2 border-l-[#10B981] flex flex-col justify-between h-28">
+          <span className="text-[9px] text-gray-500 uppercase tracking-widest font-bold">Vehicle ROI</span>
+          <div className="flex items-baseline space-x-1">
+            <span className="text-3xl font-extrabold text-white">{analytics.roi}%</span>
           </div>
         </div>
       </div>
 
-      <div className="bg-[#131826] border border-[#1E2336] rounded-2xl overflow-hidden mt-8">
-        <div className="px-6 py-5 border-b border-[#1E2336]">
-          <h2 className="text-lg font-semibold text-white">Vehicle Metrics Breakdown</h2>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-400">
-            <thead className="bg-[#0A0D14] text-gray-500 font-medium border-b border-[#1E2336]">
-              <tr>
-                <th className="px-6 py-4">Vehicle</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4 text-right">Distance (km)</th>
-                <th className="px-6 py-4 text-right">Fuel Eff. (km/L)</th>
-                <th className="px-6 py-4 text-right">Op. Cost</th>
-                <th className="px-6 py-4 text-right">ROI (%)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#1E2336]">
-              {vehicles.map((v) => (
-                <tr key={v.id} className="hover:bg-[#1A2133] transition-colors">
-                  <td className="px-6 py-4 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-xs">
-                      {v.make.charAt(0)}{v.model.charAt(0)}
+      <div className="text-[10px] text-gray-500 font-mono">
+        ROI = [Revenue - (Maintenance + Fuel)] / Acquisition Cost
+      </div>
+
+      {/* Bottom Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+        
+        {/* Monthly Expenses Bar Chart */}
+        <div className="bg-[#0A0C16]/50 border border-[#1E2336] rounded-xl p-5">
+          <h2 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6">Monthly Expenses</h2>
+          <div className="flex items-end space-x-4 h-40">
+            {expensesArray.map((item: any, idx: number) => {
+              const cost = item.cost ?? item.revenue ?? 0;
+              const heightPct = Math.max(2, (cost / maxExpense) * 100);
+              return (
+                <div key={idx} className="flex flex-col justify-end items-center flex-1 group h-full">
+                  <div className="w-full bg-[#3B82F6] opacity-80 group-hover:opacity-100 transition-all rounded-t relative" style={{ height: `${heightPct}%` }}>
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-[#1E2336] text-white text-[9px] px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      {cost.toLocaleString()}
                     </div>
-                    <div>
-                      <div className="text-white font-medium">{v.plateNumber}</div>
-                      <div className="text-xs text-gray-500">{v.make} {v.model}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      v.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'
-                    }`}>
-                      {v.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right font-medium text-white">{v.distance.toLocaleString()}</td>
-                  <td className="px-6 py-4 text-right text-gray-300">{v.fuelEfficiency.toFixed(2)}</td>
-                  <td className="px-6 py-4 text-right text-rose-300">${v.operationalCost.toLocaleString()}</td>
-                  <td className="px-6 py-4 text-right font-medium text-purple-400">{v.roi.toFixed(2)}%</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                  <span className="text-[9px] text-gray-500 mt-2">{item.month}</span>
+                </div>
+              )
+            })}
+          </div>
         </div>
+
+        {/* Top Costliest Vehicles */}
+        <div className="bg-[#0A0C16]/50 border border-[#1E2336] rounded-xl p-5">
+          <h2 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6">Top Costliest Vehicles</h2>
+          <div className="space-y-6">
+            {vehiclesArray.length > 0 ? (
+              vehiclesArray.map((v: any, idx: number) => {
+                const widthPct = Math.max(5, (v.totalCost / maxCost) * 100);
+                const colors = ['bg-[#F43F5E]', 'bg-[#F97316]', 'bg-[#3B82F6]'];
+                const color = colors[idx] || 'bg-gray-500';
+                
+                return (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-gray-300 font-medium">{v.regNo} <span className="text-gray-500 text-[10px]">({v.model})</span></span>
+                      <span className="text-gray-400 font-mono">{v.totalCost.toLocaleString()}</span>
+                    </div>
+                    <div className="w-full bg-[#1E2336] h-2 rounded-full overflow-hidden">
+                      <div className={`${color} h-full rounded-full transition-all duration-500`} style={{ width: `${widthPct}%` }}></div>
+                    </div>
+                  </div>
+                )
+              })
+            ) : (
+              <div className="text-xs text-gray-500 text-center py-10">No cost data available</div>
+            )}
+          </div>
+        </div>
+
       </div>
+
     </div>
   );
 }

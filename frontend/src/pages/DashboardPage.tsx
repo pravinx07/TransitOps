@@ -1,3 +1,4 @@
+import { useMinimumLoading } from "../hooks/useMinimumLoading";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
@@ -27,10 +28,12 @@ export default function DashboardPage() {
 
   const userRole = user?.role || "DRIVER";
 
-  if (isLoading) {
+  const showLoading = useMinimumLoading(isLoading, 800);
+
+  if (showLoading) {
     return (
       <div className="space-y-6 font-sans animate-pulse pb-10">
-        <div className="flex justify-between">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#1E2336]">
           <div><div className="h-6 w-48 bg-[#1E2336] rounded mb-2"></div><div className="h-4 w-32 bg-[#1E2336] rounded"></div></div>
           <div className="h-8 w-24 bg-[#1E2336] rounded-full"></div>
         </div>
@@ -66,7 +69,7 @@ export default function DashboardPage() {
     <div className="space-y-6 font-sans animate-in fade-in duration-300 pb-10">
       
       {/* Top Welcome Title */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#1E2336]">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Dashboard Overview</h1>
           <p className="text-xs text-gray-500 mt-1">Welcome back, {user?.name || "Guest User"}</p>
@@ -74,7 +77,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Dashboard Filters Row */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-[#1E2336]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
         <div className="flex items-center space-x-2 text-[10px] font-bold text-gray-500 tracking-wider">
           <SlidersHorizontal className="h-3 w-3" />
           <span>FILTERS</span>

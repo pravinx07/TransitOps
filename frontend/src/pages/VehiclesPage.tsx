@@ -1,3 +1,4 @@
+import { useMinimumLoading } from "../hooks/useMinimumLoading";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Plus, Search, Pencil, Trash2, X, Loader2, AlertCircle, ChevronDown } from "lucide-react";
@@ -52,6 +53,8 @@ export default function VehiclesPage() {
 
   const token = localStorage.getItem("token");
   const authHeaders = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
+
+  const showLoading = useMinimumLoading(loading, 800);
 
   const fetchVehicles = useCallback(async () => {
     setLoading(true);
@@ -113,23 +116,21 @@ export default function VehiclesPage() {
   };
 
   return (
-    <div className="space-y-5 font-sans">
+    <div className="space-y-5 font-sans pb-10">
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      {/* Standardized Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#1E2336]">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Vehicle Registry</h1>
-          <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
-            Reg. No. must be unique · Retired/In Shop vehicles hidden from Trip Dispatcher
-          </p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Vehicle Registry</h1>
+          <p className="text-xs text-gray-500 mt-1">Reg. No. must be unique · Retired/In Shop vehicles hidden from Trip Dispatcher</p>
         </div>
         {isManager && (
           <button
             onClick={openCreate}
-            className="flex items-center justify-center gap-2 px-3 py-2 sm:px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-lg transition-all hover:-translate-y-0.5 shadow-lg shadow-indigo-600/20 cursor-pointer shrink-0"
+            className="w-full sm:w-auto bg-[#4F46E5] hover:bg-[#4338CA] text-white px-5 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(79,70,229,0.2)]"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">Add Vehicle</span>
+            <span className="inline">Add Vehicle</span>
           </button>
         )}
       </div>
@@ -189,10 +190,20 @@ export default function VehiclesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#1e2336] text-xs">
-              {loading ? (
-                <tr><td colSpan={8} className="py-16 text-center text-gray-500">
-                  <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />Loading vehicles...
-                </td></tr>
+              {showLoading ? (
+                // Skeleton loading rows
+                [...Array(5)].map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="px-4 py-4"><div className="h-4 w-16 bg-[#1E2336] rounded"></div></td>
+                    <td className="px-4 py-4"><div className="h-4 w-20 bg-[#1E2336] rounded mb-1"></div><div className="h-3 w-12 bg-[#1E2336] rounded"></div></td>
+                    <td className="px-4 py-4"><div className="h-4 w-12 bg-[#1E2336] rounded"></div></td>
+                    <td className="px-4 py-4"><div className="h-4 w-10 bg-[#1E2336] rounded"></div></td>
+                    <td className="px-4 py-4"><div className="h-4 w-16 bg-[#1E2336] rounded"></div></td>
+                    <td className="px-4 py-4"><div className="h-4 w-16 bg-[#1E2336] rounded"></div></td>
+                    <td className="px-4 py-4"><div className="h-5 w-20 bg-[#1E2336] rounded-full"></div></td>
+                    {isManager && <td className="px-4 py-4"><div className="h-4 w-16 bg-[#1E2336] rounded"></div></td>}
+                  </tr>
+                ))
               ) : vehicles.length === 0 ? (
                 <tr><td colSpan={8} className="py-16 text-center text-gray-500">No vehicles found</td></tr>
               ) : vehicles.map(v => (
