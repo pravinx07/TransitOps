@@ -1,6 +1,8 @@
+import { useMinimumLoading } from "../hooks/useMinimumLoading";
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Loader2, Check, Minus } from "lucide-react";
+
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
@@ -12,6 +14,8 @@ export default function SettingsPage() {
   const isManager = user?.role === "FLEET_MANAGER";
 
   const [loading, setLoading] = useState(true);
+  const showLoading = useMinimumLoading(loading, 800);
+
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
@@ -121,19 +125,30 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 font-sans pb-10">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      
+      {/* Standardized Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#1E2336]">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Settings & RBAC</h1>
-          <p className="text-[11px] text-gray-500 mt-1 leading-relaxed">
-            Manage global application configurations and view/edit role permissions.
-          </p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Settings & RBAC</h1>
+          <p className="text-xs text-gray-500 mt-1">Manage global application configurations and view/edit role permissions</p>
         </div>
       </div>
 
-      {loading ? (
-        <div className="py-16 text-center text-gray-500">
-          <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />
-          <p className="text-xs">Loading settings...</p>
+      {showLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[300px_1fr] xl:grid-cols-[350px_1fr] gap-8 lg:gap-12 items-start animate-pulse">
+          <div>
+            <div className="h-4 w-24 bg-[#1E2336] rounded mb-6"></div>
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i}>
+                  <div className="h-3 w-20 bg-[#1E2336] rounded mb-2"></div>
+                  <div className="h-10 w-full bg-[#0A0C16] border border-[#1E2336] rounded-md"></div>
+                </div>
+              ))}
+            </div>
+            <div className="h-10 w-full bg-[#1E2336] rounded-md mt-6"></div>
+          </div>
+          <div className="bg-[#0A0C16]/50 border border-[#1E2336] rounded-2xl overflow-hidden h-[400px]"></div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[300px_1fr] xl:grid-cols-[350px_1fr] gap-8 lg:gap-12 items-start">

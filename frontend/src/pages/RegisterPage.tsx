@@ -3,15 +3,16 @@ import { useAuth } from "../context/AuthContext";
 import type { Role } from "../types/auth";
 import { useNavigate } from "react-router-dom";
 import { Truck, AlertCircle, ShieldAlert, ArrowRight, Eye, EyeOff } from "lucide-react";
+import toast from 'react-hot-toast';
 
-export default function LoginPage() {
-  const { login, user } = useAuth();
+export default function RegisterPage() {
+  const { register, user } = useAuth();
   const navigate = useNavigate();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<Role>("FLEET_MANAGER");
-  const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -27,6 +28,10 @@ export default function LoginPage() {
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
+
+    if (!name) {
+      newErrors.name = "Name is required";
+    }
 
     if (!email) {
       newErrors.email = "Email address is required";
@@ -52,16 +57,17 @@ export default function LoginPage() {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
-    const result = await login(email, password, role);
+    const result = await register(name, email, password, role);
     setIsSubmitting(false);
 
     if (result.success) {
+      toast.success("Account created successfully!");
       navigate("/dashboard");
     } else {
       if (result.errors) {
         setErrors(result.errors);
       }
-      setGeneralError(result.message || "Failed to sign in. Please verify your credentials.");
+      setGeneralError(result.message || "Failed to create account. Please try again.");
     }
   };
 
@@ -88,11 +94,11 @@ export default function LoginPage() {
 
           <div className="space-y-8 animate-in slide-in-from-left-8 duration-700 delay-150">
             <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-[1.1]">
-              One platform. <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Total control.</span>
+              Join the future of <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">fleet management.</span>
             </h2>
             <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-sm">
-              Seamlessly connect your entire fleet operation with unified, role-based access control.
+              Create an account to connect your operations and gain total control.
             </p>
             
             <div className="space-y-5 pt-4">
@@ -119,7 +125,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* Right panel - Login Form */}
+      {/* Right panel - Register Form */}
       <div className="relative w-full md:w-[55%] flex items-center justify-center p-8 md:p-12">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02] pointer-events-none"></div>
 
@@ -129,8 +135,8 @@ export default function LoginPage() {
           <div className="bg-[#11151F]/80 backdrop-blur-xl border border-[#23293D] rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/50">
             
             <div className="space-y-2 mb-10 text-center">
-              <h1 className="text-3xl font-bold tracking-tight text-white">Welcome back</h1>
-              <p className="text-sm text-gray-400">Sign in to your account to continue</p>
+              <h1 className="text-3xl font-bold tracking-tight text-white">Create an account</h1>
+              <p className="text-sm text-gray-400">Join TransitOps today</p>
             </div>
 
             {/* General Alert Box */}
@@ -138,7 +144,7 @@ export default function LoginPage() {
               <div className="mb-6 bg-red-500/10 border border-red-500/30 text-red-200 p-4 rounded-xl flex items-start space-x-3 text-sm animate-in slide-in-from-top-2">
                 <ShieldAlert className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-semibold block">Authentication Failed</span>
+                  <span className="font-semibold block">Registration Failed</span>
                   <span className="block text-xs mt-1 text-red-300/80">{generalError}</span>
                 </div>
               </div>
@@ -146,6 +152,28 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} className="space-y-6">
               
+              {/* Name Field */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-gray-400 block uppercase tracking-wider ml-1">Full Name</label>
+                <div className="relative group">
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="John Doe"
+                    className={`w-full bg-[#0A0C10] border ${
+                      errors.name ? "border-red-500/50 focus:ring-red-500/20" : "border-[#23293D] focus:border-blue-500 focus:ring-blue-500/20"
+                    } rounded-xl py-3 px-4 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-4 transition-all`}
+                  />
+                </div>
+                {errors.name && (
+                  <div className="flex items-center space-x-1.5 text-red-400 text-xs mt-1.5 ml-1 animate-in fade-in">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    <span>{errors.name}</span>
+                  </div>
+                )}
+              </div>
+
               {/* Email Field */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-gray-400 block uppercase tracking-wider ml-1">Email Address</label>
@@ -220,42 +248,21 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Remember Me and Forgot Password */}
-              <div className="flex items-center justify-between text-sm pt-2">
-                <label className="flex items-center space-x-3 text-gray-400 select-none cursor-pointer group">
-                  <div className="relative flex items-center justify-center">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="peer appearance-none w-5 h-5 border-2 border-gray-600 rounded-md bg-[#0A0C10] checked:bg-blue-500 checked:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all cursor-pointer"
-                    />
-                    <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
-                    </svg>
-                  </div>
-                  <span className="group-hover:text-gray-300 transition-colors">Remember me</span>
-                </label>
-                <a href="#" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
-                  Forgot password?
-                </a>
-              </div>
-
               {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
                 className="group w-full flex items-center justify-center space-x-2 py-3.5 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-semibold rounded-xl text-sm transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
               >
-                <span>{isSubmitting ? "Authenticating..." : "Sign In securely"}</span>
+                <span>{isSubmitting ? "Creating account..." : "Sign Up"}</span>
                 {!isSubmitting && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
               </button>
               
-              {/* Register Link */}
+              {/* Login Link */}
               <div className="text-center mt-6 text-sm text-gray-400">
-                Don't have an account?{' '}
-                <a href="/register" onClick={(e) => { e.preventDefault(); navigate('/register'); }} className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
-                  Sign up
+                Already have an account?{' '}
+                <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }} className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
+                  Sign in
                 </a>
               </div>
             </form>

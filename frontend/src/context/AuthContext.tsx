@@ -7,6 +7,7 @@ interface AuthContextType {
   loading: boolean;
   rbac: Record<string, string[]>;
   login: (email: string, password: string, role: Role) => Promise<{ success: boolean; message?: string; errors?: Record<string, string> }>;
+  register: (name: string, email: string, password: string, role: Role) => Promise<{ success: boolean; message?: string; errors?: Record<string, string> }>;
   logout: () => void;
 }
 
@@ -110,8 +111,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const register = async (name: string, email: string, password: string, role: Role) => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      const res = await fetch(`${apiUrl}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, email, password, role }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        const { user: loggedUser, token: authToken } = data.data;
+        localStorage.setItem("token", authToken);
+        localStorage.setItem("user", JSON.stringify(loggedUser));
+        setToken(authToken);
+        setUser(loggedUser);
+        return { success: true };
+      } else {
+        return {
+          success: false,
+          message: data.message || "Registration failed",
+          errors: data.errors,
+        };
+      }
+    } catch (error: unknown) {
+      return {
+        success: false,
+        message: "Unable to connect to the server. Please check if the backend is running.",
+      };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, rbac, login, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, rbac, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

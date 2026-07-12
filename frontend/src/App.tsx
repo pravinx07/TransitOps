@@ -4,6 +4,7 @@ import { Sidebar } from './components/layout/Sidebar';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import VehiclesPage from './pages/VehiclesPage';
 import DriversPage from './pages/DriversPage';
@@ -143,6 +144,7 @@ function App() {
           {/* Public Landing & Login Pages */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
 
           {/* Protected Subpages with Sidebar Layout */}
           <Route element={<ProtectedLayout />}>

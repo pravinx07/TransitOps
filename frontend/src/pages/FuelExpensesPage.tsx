@@ -1,3 +1,4 @@
+import { useMinimumLoading } from "../hooks/useMinimumLoading";
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Loader2 } from 'lucide-react';
@@ -26,6 +27,8 @@ export default function FuelExpensesPage() {
   const { data: expenses, isLoading: isLoadingExpenses } = useQuery({ queryKey: ['expenses'], queryFn: getExpenses });
   const { data: opCost } = useQuery({ queryKey: ['opCost'], queryFn: getOperationalCost });
   const { data: vehicles } = useQuery({ queryKey: ['vehicles'], queryFn: getVehicles });
+
+  const showLoading = useMinimumLoading(isLoadingFuel || isLoadingExpenses, 800);
 
   // Filtering
   const filteredFuelLogs = fuelLogs?.filter(l => l.vehicle?.regNo.toLowerCase().includes(debouncedSearchQuery.toLowerCase())) || [];
@@ -89,28 +92,32 @@ export default function FuelExpensesPage() {
   return (
     <div className="h-full flex flex-col space-y-6 animate-in fade-in duration-300 font-sans pb-10">
       
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
-          <input 
-            type="text"
-            placeholder="Search by vehicle or trip..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#0A0C16] border border-[#1E2336] rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-[#5D87FF] transition-colors"
-          />
+      {/* Standardized Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#1E2336]">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Fuel & Expenses</h1>
+          <p className="text-xs text-gray-500 mt-1">Track fleet operational costs and manage reimbursements</p>
         </div>
-        <div className="flex gap-3 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+            <input 
+              type="text"
+              placeholder="Search by vehicle or trip..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#0A0C16] border border-[#1E2336] rounded-xl pl-9 pr-4 py-2 text-sm text-white focus:outline-none focus:border-[#5D87FF] transition-all placeholder-gray-500"
+            />
+          </div>
           <button 
             onClick={() => setIsFuelModalOpen(true)}
-            className="flex-1 sm:flex-none bg-[#D97706] hover:bg-[#B45309] text-white px-5 py-2.5 rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#D97706]/20 cursor-pointer"
+            className="flex-1 sm:flex-none bg-[#4F46E5] hover:bg-[#4338CA] text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(79,70,229,0.2)]"
           >
             <Plus size={16} strokeWidth={3} /> Log Fuel
           </button>
           <button 
             onClick={() => setIsExpenseModalOpen(true)}
-            className="flex-1 sm:flex-none bg-[#059669] hover:bg-[#047857] text-white px-5 py-2.5 rounded-full text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-[#059669]/20 cursor-pointer"
+            className="flex-1 sm:flex-none bg-[#0A0C16] text-[#818CF8] hover:text-[#A5B4FC] hover:bg-[#1E2336] border border-[#1E2336] px-4 py-2 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all"
           >
             <Plus size={16} strokeWidth={3} /> Add Expense
           </button>
@@ -132,8 +139,16 @@ export default function FuelExpensesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#1E2336] text-xs">
-                {isLoadingFuel ? (
-                  <tr><td colSpan={4} className="py-8 text-center text-gray-500">Loading...</td></tr>
+                {showLoading ? (
+                  // Skeleton loading rows
+                  [...Array(3)].map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="py-4 px-5"><div className="h-4 w-24 bg-[#1E2336] rounded"></div></td>
+                      <td className="py-4 px-5"><div className="h-4 w-20 bg-[#1E2336] rounded"></div></td>
+                      <td className="py-4 px-5"><div className="h-4 w-16 bg-[#1E2336] rounded"></div></td>
+                      <td className="py-4 px-5 flex justify-end"><div className="h-4 w-20 bg-[#1E2336] rounded"></div></td>
+                    </tr>
+                  ))
                 ) : filteredFuelLogs.length === 0 ? (
                   <tr><td colSpan={4} className="py-8 text-center text-gray-500">No fuel logs found.</td></tr>
                 ) : (
@@ -170,8 +185,19 @@ export default function FuelExpensesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#1E2336] text-xs">
-                {isLoadingExpenses ? (
-                  <tr><td colSpan={7} className="py-8 text-center text-gray-500">Loading...</td></tr>
+                {showLoading ? (
+                  // Skeleton loading rows
+                  [...Array(3)].map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="py-4 px-5"><div className="h-4 w-20 bg-[#1E2336] rounded"></div></td>
+                      <td className="py-4 px-5"><div className="h-4 w-24 bg-[#1E2336] rounded"></div></td>
+                      <td className="py-4 px-5 flex justify-end"><div className="h-4 w-12 bg-[#1E2336] rounded"></div></td>
+                      <td className="py-4 px-5"><div className="h-4 w-12 bg-[#1E2336] rounded float-right"></div></td>
+                      <td className="py-4 px-5"><div className="h-4 w-12 bg-[#1E2336] rounded float-right"></div></td>
+                      <td className="py-4 px-5"><div className="h-4 w-16 bg-[#1E2336] rounded float-right"></div></td>
+                      <td className="py-4 px-5 flex justify-center"><div className="h-5 w-20 bg-[#1E2336] rounded-full"></div></td>
+                    </tr>
+                  ))
                 ) : filteredExpenses.length === 0 ? (
                   <tr><td colSpan={7} className="py-8 text-center text-gray-500">No expenses found.</td></tr>
                 ) : (
