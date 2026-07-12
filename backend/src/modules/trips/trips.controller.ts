@@ -40,8 +40,8 @@ export const createTrip = async (req: Req, res: Res) => {
     const vehicle = await prisma.vehicle.findUnique({ where: { id: vehicleId } });
     if (!vehicle) return sendError(res, 'Vehicle not found', 404);
     
-    if (cargoWeight > vehicle.capacityKg) {
-      return sendError(res, `Capacity exceeded. Maximum is ${vehicle.capacityKg} kg.`, 400);
+    if (cargoWeight > (vehicle.capacityKg || 0)) {
+      return sendError(res, `Capacity exceeded. Maximum is ${vehicle.capacityKg || 0} kg.`, 400);
     }
 
     const driver = await prisma.driver.findUnique({ where: { id: driverId } });
