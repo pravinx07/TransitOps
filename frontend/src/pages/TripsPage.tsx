@@ -1,18 +1,14 @@
 import { useMinimumLoading } from "../hooks/useMinimumLoading";
-import { useQuery } from '@tanstack/react-query';
-import { Route, MapPin, Clock } from 'lucide-react';
-import { getVehicles } from '../services/vehiclesApi';
-
-
-import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Route, MapPin, Clock, Truck, Package, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import { getVehicles } from '../services/vehiclesApi';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import toast from 'react-hot-toast';
 import { getTrips, createTrip, updateTripStatus, getAvailableVehicles, type Trip } from '../services/tripsApi';
 import { getAvailableDrivers } from '../services/driversApi';
-import { Truck, MapPin, Package, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const tripSchema = z.object({
@@ -41,7 +37,7 @@ export default function TripsPage() {
   
   // Data Fetching
   const { data: trips = [], isLoading: loadingTrips } = useQuery({ queryKey: ['trips'], queryFn: getTrips });
-  const { data: vehicles = [] } = useQuery({ queryKey: ['availableVehicles'], queryFn: getAvailableVehicles });
+  const { data: availableVehicles = [] } = useQuery({ queryKey: ['availableVehicles'], queryFn: getAvailableVehicles });
   const { data: drivers = [] } = useQuery({ queryKey: ['availableDrivers'], queryFn: getAvailableDrivers });
 
   // Form setup
@@ -168,7 +164,7 @@ export default function TripsPage() {
                 <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">Vehicle (Available Only)</label>
                 <select {...register('vehicleId')} className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2.5 text-gray-900 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none appearance-none">
                   <option value="">Select Vehicle...</option>
-                  {vehicles.map((v: any) => (
+                  {availableVehicles.map((v: any) => (
                     <option key={v.id} value={v.id}>{v.plateNumber} - {v.capacityKg} kg capacity</option>
                   ))}
                 </select>
