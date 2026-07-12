@@ -170,6 +170,7 @@ function App() {
               path="/trips"
               element={
                 <RoleProtectedRoute pathId="/trips">
+                <RoleProtectedRoute allowedRoles={["DRIVER", "FLEET_MANAGER"]}>
                   <TripsPage />
                 </RoleProtectedRoute>
               }

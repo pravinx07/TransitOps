@@ -145,31 +145,34 @@ export default function DriversPage() {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4 bg-white border border-gray-200 shadow-sm rounded-xl p-4">
-        <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider mr-2 w-full sm:w-auto mb-2 sm:mb-0">Toggle Stat:</span>
-        {[
-          { status: 'ALL', label: 'All', color: 'hover:bg-gray-100' },
-          { status: 'AVAILABLE', label: '🟢 Available', color: 'bg-green-500 text-white' },
-          { status: 'ON_TRIP', label: '🔵 On Trip', color: 'bg-blue-500 text-white' },
-          { status: 'ON_LEAVE', label: '🟡 On Leave', color: 'bg-yellow-500 text-white' },
-          { status: 'OFF_DUTY', label: '⚫ Off Duty', color: 'bg-gray-700 text-white' },
-          { status: 'SUSPENDED', label: '🔴 Suspended', color: 'bg-red-500 text-white' }
-        ].map((stat) => (
-          <button
-            key={stat.status}
-            onClick={() => setStatusFilter(stat.status as StatusFilter)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              statusFilter === stat.status 
-                ? (stat.status === 'ALL' ? 'bg-gray-800 text-white' : stat.color + ' shadow-md scale-105') 
-                : 'bg-transparent text-gray-500 border border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            {stat.label}
-          </button>
-        ))}
+      <div className="flex flex-col lg:flex-row items-start lg:items-center gap-3 bg-white border border-gray-200 shadow-sm rounded-xl p-4">
+        <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider shrink-0">Filters:</span>
         
-        <p className="w-full lg:w-auto lg:ml-auto mt-2 lg:mt-0 text-xs text-orange-400 font-medium text-center sm:text-left">
-          Rule: Expired license or Suspended status → blocked from trip assignment
+        <div className="flex w-full overflow-x-auto gap-2 pb-2 lg:pb-0 scrollbar-hide">
+          {[
+            { status: 'ALL', label: 'All', color: 'hover:bg-gray-100' },
+            { status: 'AVAILABLE', label: '🟢 Available', color: 'bg-green-500 text-white' },
+            { status: 'ON_TRIP', label: '🔵 On Trip', color: 'bg-blue-500 text-white' },
+            { status: 'ON_LEAVE', label: '🟡 On Leave', color: 'bg-yellow-500 text-white' },
+            { status: 'OFF_DUTY', label: '⚫ Off Duty', color: 'bg-gray-700 text-white' },
+            { status: 'SUSPENDED', label: '🔴 Suspended', color: 'bg-red-500 text-white' }
+          ].map((stat) => (
+            <button
+              key={stat.status}
+              onClick={() => setStatusFilter(stat.status as StatusFilter)}
+              className={`shrink-0 px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                statusFilter === stat.status 
+                  ? (stat.status === 'ALL' ? 'bg-gray-800 text-white' : stat.color + ' shadow-md lg:scale-105') 
+                  : 'bg-transparent text-gray-500 border border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              {stat.label}
+            </button>
+          ))}
+        </div>
+        
+        <p className="w-full lg:w-auto lg:ml-auto text-[10px] sm:text-xs text-orange-400 font-medium shrink-0">
+          Rule: Expired license or Suspended status → blocked
         </p>
       </div>
 
