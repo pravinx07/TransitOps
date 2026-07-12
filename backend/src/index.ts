@@ -6,6 +6,7 @@ import vehicleRoutes from "./modules/vehicles/vehicles.routes";
 import driversRoutes from "./modules/drivers/drivers.routes";
 import settingsRoutes from "./modules/settings/settings.routes";
 import financeRoutes from "./modules/finance/finance.routes";
+import dashboardRoutes from "./modules/dashboard/dashboard.routes";
 import tripsRoutes from "./modules/trips/trips.routes";
 import vehiclesRoutes from "./modules/vehicles/vehicles.routes";
 import { sendError } from "./utils/apiResponse";
@@ -26,6 +27,7 @@ app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/drivers", driversRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/finance", financeRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/trips", tripsRoutes);
 app.use("/api/vehicles", vehiclesRoutes);
 
