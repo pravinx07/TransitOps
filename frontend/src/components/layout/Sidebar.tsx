@@ -73,7 +73,7 @@ export const Sidebar = () => {
         <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
           Overview
         </div>
-        <nav className="flex md:flex-col space-x-2 md:space-x-0 md:space-y-1 pb-2 md:pb-0">
+        <nav className="flex flex-col space-y-1">
           {sidebarItems.map((item) => {
             const isActive = location.pathname.startsWith(item.path);
             const allowed = hasAccess(item.path);

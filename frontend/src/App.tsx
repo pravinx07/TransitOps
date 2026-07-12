@@ -87,7 +87,7 @@ function ProtectedLayout() {
     <ProtectedRoute>
       <div className="flex bg-[#07090E] min-h-screen text-white w-full">
         <Sidebar />
-        <main className="flex-1 p-8 border-l border-[#1E2336] overflow-y-auto">
+        <main className="flex-1 p-4 md:p-8 border-l border-[#1E2336] overflow-y-auto">
           <Outlet />
         </main>
       </div>
@@ -129,7 +129,7 @@ function App() {
             <Route
               path="/trips"
               element={
-                <RoleProtectedRoute allowedRoles={["DRIVER"]}>
+                <RoleProtectedRoute allowedRoles={["DRIVER", "FLEET_MANAGER"]}>
                   <TripsPage />
                 </RoleProtectedRoute>
               }
