@@ -243,7 +243,7 @@ export default function FuelExpensesPage() {
                   className="w-full bg-[#0A0C16] border border-[#1E2336] rounded-md px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#5D87FF] [color-scheme:dark]" 
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-2">
                     Liters <span className="text-red-500">*</span>
@@ -290,7 +290,7 @@ export default function FuelExpensesPage() {
           <div className="bg-[#131826] border border-[#1E2336] rounded-2xl p-6 w-full max-w-md">
             <h2 className="text-lg font-bold text-white mb-4">Add Expense</h2>
             <form onSubmit={handleAddExpense} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-2">
                     Trip Ref <span className="text-red-500">*</span>
@@ -336,7 +336,7 @@ export default function FuelExpensesPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-[10px] text-gray-400 uppercase tracking-wider mb-2">Toll</label>
                   <input 

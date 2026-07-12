@@ -1,12 +1,23 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
-import { SlidersHorizontal, ShieldCheck } from "lucide-react";
+import { SlidersHorizontal, ShieldCheck, Loader2 } from "lucide-react";
+import { fetchDashboardMetrics } from "../services/api";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [showRoleInfo, setShowRoleInfo] = useState(true);
+  const [filters, setFilters] = useState({ type: 'All', status: 'All', region: 'All' });
 
-  // Helper to format role names to display-friendly strings
+  // Fetch real data
+  const { data: metrics, isLoading, isError } = useQuery({
+    queryKey: ['dashboardMetrics', filters],
+    queryFn: () => fetchDashboardMetrics(filters),
+    refetchInterval: 30000, // refetch every 30s
+    placeholderData: (prev: any) => prev // Prevent hard refresh on filter change
+  });
+
+  // Helper to format role names
   const formatRole = (roleStr: string) => {
     return roleStr
       .split("_")
@@ -16,8 +27,43 @@ export default function DashboardPage() {
 
   const userRole = user?.role || "DRIVER";
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6 font-sans animate-pulse pb-10">
+        <div className="flex justify-between">
+          <div><div className="h-6 w-48 bg-[#1E2336] rounded mb-2"></div><div className="h-4 w-32 bg-[#1E2336] rounded"></div></div>
+          <div className="h-8 w-24 bg-[#1E2336] rounded-full"></div>
+        </div>
+        <div className="h-12 w-full bg-[#111422] rounded-xl border border-[#1E2336]"></div>
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+          {[...Array(7)].map((_, i) => <div key={i} className="h-24 bg-[#0A0C16] border border-[#1E2336] rounded-xl"></div>)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 h-64 bg-[#0A0C16] border border-[#1E2336] rounded-xl"></div>
+          <div className="h-64 bg-[#0A0C16] border border-[#1E2336] rounded-xl"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !metrics) {
+    return (
+      <div className="flex h-full items-center justify-center text-red-400">
+        Failed to load dashboard data.
+      </div>
+    );
+  }
+
+  const { vehicleStatusDistribution } = metrics;
+  const totalVehicles = metrics.activeVehicles || 1; // avoid division by zero
+
+  const availablePct = (vehicleStatusDistribution.available / totalVehicles) * 100;
+  const onTripPct = (vehicleStatusDistribution.onTrip / totalVehicles) * 100;
+  const inShopPct = (vehicleStatusDistribution.inShop / totalVehicles) * 100;
+  const retiredPct = (vehicleStatusDistribution.retired / totalVehicles) * 100;
+
   return (
-    <div className="space-y-6 font-sans">
+    <div className="space-y-6 font-sans animate-in fade-in duration-300 pb-10">
       
       {/* Top Welcome Title */}
       <div className="flex items-center justify-between">
@@ -27,113 +73,169 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Active Role Notification banner */}
-      {showRoleInfo && (
-        <div className="bg-amber-600/10 border border-amber-500/25 text-amber-250 p-3.5 rounded-lg flex items-start justify-between text-xs animate-fadeIn">
-          <div className="flex items-start space-x-3">
-            <ShieldCheck className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
-            <div>
-              <span className="font-bold block">RBAC Active: Logged in as {formatRole(userRole)}</span>
-              <span className="block leading-relaxed mt-0.5 text-gray-450">
-                You have scope permissions for the sections assigned to your role. Try clicking on other sidebar items (like Drivers, Fleet, or Maintenance) to test RBAC lockout rules in action!
-              </span>
-            </div>
-          </div>
-          <button 
-            onClick={() => setShowRoleInfo(false)} 
-            className="text-slate-500 hover:text-slate-350 font-bold ml-4 cursor-pointer"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
       {/* Dashboard Filters Row */}
-      <div className="flex flex-wrap items-center justify-between gap-4 bg-[#111422]/50 p-4 rounded-xl border border-[#1E2336]">
-        <div className="flex items-center space-x-2 text-xs font-bold text-slate-350">
-          <SlidersHorizontal className="h-4 w-4 text-slate-500" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2 border-b border-[#1E2336]">
+        <div className="flex items-center space-x-2 text-[10px] font-bold text-gray-500 tracking-wider">
+          <SlidersHorizontal className="h-3 w-3" />
           <span>FILTERS</span>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <div className="flex flex-col space-y-1">
-            <span className="text-[10px] text-gray-550 uppercase tracking-wider">Vehicle Types</span>
-            <select className="bg-slate-950 border border-slate-850 text-[11px] text-slate-300 rounded px-2.5 py-1 focus:outline-none focus:border-slate-750">
-              <option>Vehicle Types: All</option>
-              <option>Trucks</option>
-              <option>Vans</option>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center space-x-2">
+            <span className="text-[9px] text-gray-500 uppercase tracking-widest">Vehicle Types</span>
+            <select 
+              value={filters.type}
+              onChange={(e) => setFilters(prev => ({ ...prev, type: e.target.value }))}
+              className="bg-[#0A0C16] border border-[#1E2336] text-[10px] text-slate-300 rounded px-2 py-1 focus:outline-none focus:border-[#5D87FF]"
+            >
+              <option value="All">All</option>
+              <option value="Truck">Trucks</option>
+              <option value="Van">Vans</option>
+              <option value="Bus">Buses</option>
             </select>
           </div>
-          <div className="flex flex-col space-y-1">
-            <span className="text-[10px] text-gray-550 uppercase tracking-wider">Status</span>
-            <select className="bg-slate-950 border border-slate-850 text-[11px] text-slate-300 rounded px-2.5 py-1 focus:outline-none focus:border-slate-750">
-              <option>Status: All</option>
-              <option>On Trip</option>
-              <option>Completed</option>
-              <option>Dispatched</option>
+          <div className="flex items-center space-x-2">
+            <span className="text-[9px] text-gray-500 uppercase tracking-widest">Status</span>
+            <select 
+              value={filters.status}
+              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+              className="bg-[#0A0C16] border border-[#1E2336] text-[10px] text-slate-300 rounded px-2 py-1 focus:outline-none focus:border-[#5D87FF]"
+            >
+              <option value="All">All</option>
+              <option value="AVAILABLE">Available</option>
+              <option value="ON_TRIP">On Trip</option>
+              <option value="IN_SHOP">In Shop</option>
+              <option value="RETIRED">Retired</option>
             </select>
           </div>
-          <div className="flex flex-col space-y-1">
-            <span className="text-[10px] text-gray-550 uppercase tracking-wider">Region</span>
-            <select className="bg-slate-950 border border-slate-850 text-[11px] text-slate-300 rounded px-2.5 py-1 focus:outline-none focus:border-slate-750">
-              <option>Region: All</option>
-              <option>North</option>
-              <option>West</option>
-              <option>East</option>
+          <div className="flex items-center space-x-2">
+            <span className="text-[9px] text-gray-500 uppercase tracking-widest">Region</span>
+            <select 
+              value={filters.region}
+              onChange={(e) => setFilters(prev => ({ ...prev, region: e.target.value }))}
+              className="bg-[#0A0C16] border border-[#1E2336] text-[10px] text-slate-300 rounded px-2 py-1 focus:outline-none focus:border-[#5D87FF]"
+            >
+              <option value="All">All</option>
+              <option value="North">North</option>
+              <option value="West">West</option>
+              <option value="East">East</option>
+              <option value="South">South</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Stats Row 1 */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
         {[
-          { label: "ACTIVE VEHICLES", count: "53", color: "border-l-indigo-500" },
-          { label: "AVAILABLE VEHICLES", count: "42", color: "border-l-emerald-500" },
-          { label: "VEHICLES IN MAINTENANCE", count: "05", color: "border-l-amber-500" }
+          { label: "ACTIVE VEHICLES", count: metrics.activeVehicles.toString().padStart(2, '0'), color: "border-l-[#5D87FF]" },
+          { label: "AVAILABLE VEHICLES", count: metrics.availableVehicles.toString().padStart(2, '0'), color: "border-l-[#059669]" },
+          { label: "VEHICLES IN MAINTENANCE", count: metrics.vehiclesInMaintenance.toString().padStart(2, '0'), color: "border-l-[#D97706]" },
+          { label: "ACTIVE TRIPS", count: metrics.activeTrips.toString().padStart(2, '0'), color: "border-l-[#3B82F6]" },
+          { label: "PENDING TRIPS", count: metrics.pendingTrips.toString().padStart(2, '0'), color: "border-l-gray-500" },
+          { label: "DRIVERS ON DUTY", count: metrics.driversOnDuty.toString().padStart(2, '0'), color: "border-l-[#8B5CF6]" },
+          { label: "FLEET UTILIZATION", count: `${metrics.fleetUtilization}%`, color: "border-l-[#10B981]" }
         ].map((stat, idx) => (
-          <div key={idx} className={`bg-[#0d101a] border border-[#1e2336] border-l-4 ${stat.color} p-5 rounded-xl flex flex-col justify-between h-28`}>
-            <span className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">{stat.label}</span>
-            <span className="text-4xl font-extrabold text-white tracking-tight">{stat.count}</span>
+          <div key={idx} className={`bg-[#0A0C16]/50 border border-[#1E2336] border-l-4 ${stat.color} p-4 rounded-xl flex flex-col justify-between h-24`}>
+            <span className="text-[9px] text-gray-500 uppercase tracking-wider font-bold truncate">{stat.label}</span>
+            <span className="text-2xl font-extrabold text-white tracking-tight">{stat.count}</span>
           </div>
         ))}
       </div>
 
-      {/* Recent Trips Table Card */}
-      <div className="bg-[#0d101a] border border-[#1e2336] rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-[#1e2336] flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Recent Trips</span>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-950/40 text-[10px] text-gray-500 uppercase tracking-wider border-b border-[#1e2336]">
-                <th className="py-3 px-5 font-bold">Trip</th>
-                <th className="py-3 px-5 font-bold">Vehicle</th>
-                <th className="py-3 px-5 font-bold">Driver</th>
-                <th className="py-3 px-5 font-bold">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-900/60 text-xs">
-              {[
-                { id: "TR001", vehicle: "VAN-05", driver: "Alex Mercer", status: "On Trip", statusColor: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20" },
-                { id: "TR002", vehicle: "TRK-01", driver: "John Doe", status: "Completed", statusColor: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" },
-                { id: "TR003", vehicle: "AMV-03", driver: "Priya Patel", status: "Dispatched", statusColor: "bg-amber-500/10 text-amber-400 border border-amber-500/20" },
-                { id: "TR004", vehicle: "--", driver: "--", status: "Draft", statusColor: "bg-slate-800/40 text-slate-400 border border-slate-800/60" }
-              ].map((row, idx) => (
-                <tr key={idx} className="hover:bg-slate-950/20">
-                  <td className="py-3.5 px-5 font-semibold text-slate-300">{row.id}</td>
-                  <td className="py-3.5 px-5 text-slate-450">{row.vehicle}</td>
-                  <td className="py-3.5 px-5 text-slate-450">{row.driver}</td>
-                  <td className="py-3.5 px-5">
-                    <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${row.statusColor}`}>
-                      {row.status}
-                    </span>
-                  </td>
+      {/* Bottom Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* Recent Trips Table */}
+        <div className="lg:col-span-2 bg-[#0A0C16]/50 border border-[#1E2336] rounded-xl p-5 overflow-hidden">
+          <h2 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Recent Trips</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[500px]">
+              <thead>
+                <tr className="border-b border-[#1E2336] text-[10px] text-gray-500 uppercase tracking-wider">
+                  <th className="pb-3 pr-4 font-bold">Trip</th>
+                  <th className="pb-3 px-4 font-bold">Vehicle</th>
+                  <th className="pb-3 px-4 font-bold">Driver</th>
+                  <th className="pb-3 px-4 font-bold">Status</th>
+                  <th className="pb-3 pl-4 font-bold text-right">ETA</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-[#1E2336] text-xs">
+                {metrics.recentTrips?.length > 0 ? (
+                  metrics.recentTrips.map((trip: any, idx: number) => (
+                    <tr key={idx} className="hover:bg-white/[0.02] transition-colors">
+                      <td className="py-3 pr-4 text-gray-300 font-medium">{trip.tripRef}</td>
+                      <td className="py-3 px-4 text-gray-400">{trip.vehicle}</td>
+                      <td className="py-3 px-4 text-gray-400">{trip.driver}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2.5 py-0.5 rounded text-[10px] font-semibold border ${
+                          trip.status === 'On Trip' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                          trip.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+                          trip.status === 'Dispatched' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' :
+                          'bg-gray-500/10 text-gray-400 border-gray-500/20'
+                        }`}>
+                          {trip.status}
+                        </span>
+                      </td>
+                      <td className="py-3 pl-4 text-right text-gray-400 font-mono">{trip.eta}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="py-6 text-center text-gray-500 text-xs">No active trips available</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
+
+        {/* Vehicle Status Progress Bars */}
+        <div className="bg-[#0A0C16]/50 border border-[#1E2336] rounded-xl p-5">
+          <h2 className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-6">Vehicle Status</h2>
+          
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300 font-medium">Available</span>
+                <span className="text-gray-400">{vehicleStatusDistribution.available}</span>
+              </div>
+              <div className="w-full bg-[#1E2336] rounded-full h-1.5 overflow-hidden">
+                <div className="bg-[#059669] h-1.5 rounded-full" style={{ width: `${availablePct}%` }}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300 font-medium">On Trip</span>
+                <span className="text-gray-400">{vehicleStatusDistribution.onTrip}</span>
+              </div>
+              <div className="w-full bg-[#1E2336] rounded-full h-1.5 overflow-hidden">
+                <div className="bg-[#3B82F6] h-1.5 rounded-full" style={{ width: `${onTripPct}%` }}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300 font-medium">In Shop</span>
+                <span className="text-gray-400">{vehicleStatusDistribution.inShop}</span>
+              </div>
+              <div className="w-full bg-[#1E2336] rounded-full h-1.5 overflow-hidden">
+                <div className="bg-[#D97706] h-1.5 rounded-full" style={{ width: `${inShopPct}%` }}></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-300 font-medium">Retired</span>
+                <span className="text-gray-400">{vehicleStatusDistribution.retired}</span>
+              </div>
+              <div className="w-full bg-[#1E2336] rounded-full h-1.5 overflow-hidden">
+                <div className="bg-red-500 h-1.5 rounded-full" style={{ width: `${retiredPct}%` }}></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>

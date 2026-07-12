@@ -12,9 +12,9 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-export const fetchDashboardMetrics = async () => {
+export const fetchDashboardMetrics = async (filters?: any) => {
   try {
-    const { data } = await api.get('/dashboard/metrics');
+    const { data } = await api.get('/dashboard/metrics', { params: filters });
     return data.data || data;
   } catch (error) {
     // Return mock data if backend route is not ready
