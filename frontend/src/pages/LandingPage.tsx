@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Truck,
   ShieldCheck,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 
 export default function LandingPage() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"manager" | "driver" | "safety" | "finance">("manager");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -141,10 +143,10 @@ export default function LandingPage() {
             </div>
 
             <div className="hidden md:flex items-center space-x-4">
-              <button className="text-slate-300 hover:text-white text-sm font-medium transition-colors cursor-pointer">
+              <button onClick={() => navigate("/login")} className="text-slate-300 hover:text-white text-sm font-medium transition-colors cursor-pointer">
                 Log in
               </button>
-              <button className="px-4 py-2 bg-indigo-650 hover:bg-indigo-600 text-white text-sm font-medium rounded-lg shadow-lg shadow-indigo-650/20 transition-all hover:-translate-y-0.5 cursor-pointer">
+              <button onClick={() => navigate("/login")} className="px-4 py-2 bg-indigo-650 hover:bg-indigo-600 text-white text-sm font-medium rounded-lg shadow-lg shadow-indigo-650/20 transition-all hover:-translate-y-0.5 cursor-pointer">
                 Get Started
               </button>
             </div>
@@ -169,8 +171,8 @@ export default function LandingPage() {
             <button onClick={() => scrollToSection("rules")} className="block w-full text-left px-3 py-2 text-slate-400 hover:text-white text-base font-medium rounded-md hover:bg-slate-900">Business Rules</button>
             <button onClick={() => scrollToSection("demo")} className="block w-full text-left px-3 py-2 text-slate-400 hover:text-white text-base font-medium rounded-md hover:bg-slate-900">Demo Flow</button>
             <div className="pt-4 border-t border-slate-900 flex flex-col space-y-2">
-              <button className="w-full py-2 text-center text-slate-300 hover:text-white font-medium">Log in</button>
-              <button className="w-full py-2 bg-indigo-600 text-white font-medium rounded-lg">Get Started</button>
+              <button onClick={() => navigate("/login")} className="w-full py-2 text-center text-slate-300 hover:text-white font-medium">Log in</button>
+              <button onClick={() => navigate("/login")} className="w-full py-2 bg-indigo-600 text-white font-medium rounded-lg">Get Started</button>
             </div>
           </div>
         )}
@@ -199,7 +201,7 @@ export default function LandingPage() {
             
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
               <button
-                onClick={() => scrollToSection("demo")}
+                onClick={() => navigate("/login")}
                 className="w-full sm:w-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2 group transition-all hover:-translate-y-0.5 cursor-pointer"
               >
                 <span>Get Started Free</span>
