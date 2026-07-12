@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Sidebar } from './components/layout/Sidebar';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -83,13 +83,40 @@ function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRouteProps)
 
 // 4. Protected Sidebar Layout
 function ProtectedLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
     <ProtectedRoute>
       <div className="flex bg-[#07090E] min-h-screen text-white w-full">
-        <Sidebar />
-        <main className="flex-1 p-4 md:p-8 border-l border-[#1E2336] overflow-y-auto">
-          <Outlet />
-        </main>
+        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Mobile top bar */}
+          <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0A0C16] border-b border-[#1E2336] sticky top-0 z-30">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-[#1E2336] transition-colors cursor-pointer"
+              aria-label="Open menu"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded bg-[#4F46E5] flex items-center justify-center">
+                <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                </svg>
+              </div>
+              <span className="text-sm font-semibold text-white">TransitOps</span>
+            </div>
+            <div className="w-9" /> {/* spacer to center logo */}
+          </header>
+
+          <main className="flex-1 p-4 md:p-8 md:border-l md:border-[#1E2336] overflow-y-auto">
+            <Outlet />
+          </main>
+        </div>
       </div>
     </ProtectedRoute>
   );

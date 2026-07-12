@@ -14,6 +14,13 @@ enum Role {
   FINANCIAL_ANALYST
 }
 
+enum VehicleStatus {
+  AVAILABLE
+  ON_TRIP
+  IN_SHOP
+  RETIRED
+}
+
 model User {
   id             String    @id @default(cuid())
   name           String
@@ -24,6 +31,19 @@ model User {
   lockedUntil    DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+}
+
+model Vehicle {
+  id        String        @id @default(cuid())
+  regNo     String        @unique
+  model     String
+  type      String
+  capacity  String
+  odometer  Int
+  avgCost   Int
+  status    VehicleStatus @default(AVAILABLE)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }
 
 enum DriverStatus {
