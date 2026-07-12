@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import type { Role } from "../types/auth";
 import { useNavigate } from "react-router-dom";
-import { Truck, AlertCircle, Key, Mail, ShieldAlert } from "lucide-react";
+import { Truck, AlertCircle, Key, Mail, ShieldAlert, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const { login, user } = useAuth();
@@ -65,185 +65,192 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#0b0f19]">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#0A0C10] font-sans selection:bg-blue-500/30">
       
-      {/* Left panel - Branding and Roles Info (Light style matching wireframe split) */}
-      <div className="w-full md:w-[42%] bg-slate-100 text-slate-900 p-8 md:p-12 flex flex-col justify-between relative overflow-hidden">
-        {/* Glow detail */}
-        <div className="absolute -top-24 -left-24 w-96 h-96 bg-indigo-200/40 rounded-full blur-[100px] pointer-events-none" />
-
+      {/* Left panel - Hero Section */}
+      <div className="relative w-full md:w-[45%] flex flex-col justify-between p-8 md:p-14 overflow-hidden border-r border-[#1E2336] bg-[#0D1117]">
+        
+        {/* Dynamic Background Gradients */}
+        <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[120px] mix-blend-screen pointer-events-none transform -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[150px] mix-blend-screen pointer-events-none transform translate-x-1/3 translate-y-1/3" />
+        
         <div className="relative z-10">
-          <div className="flex items-center space-x-2.5 mb-16">
-            <div className="p-2 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md">
-              <Truck className="h-6 w-6 text-white" />
+          <div className="flex items-center space-x-3 mb-20 animate-in slide-in-from-top-4 duration-700">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <Truck className="h-5 w-5 text-white" />
             </div>
             <div>
-              <span className="text-xl font-bold tracking-tight text-slate-900 block leading-tight">TransitOps</span>
-              <span className="text-[10px] text-slate-500 font-medium block">Smart Transport Operations Platform</span>
+              <span className="text-2xl font-bold tracking-tight text-white block leading-tight">TransitOps</span>
+              <span className="text-[11px] text-blue-400 font-medium tracking-wide uppercase block mt-0.5">Smart Transport Platform</span>
             </div>
           </div>
 
-          <div className="space-y-6 max-w-sm">
-            <h2 className="text-2xl font-black tracking-tight text-slate-900">
-              One login, four roles:
+          <div className="space-y-8 animate-in slide-in-from-left-8 duration-700 delay-150">
+            <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-[1.1]">
+              One platform. <br/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Total control.</span>
             </h2>
-            <ul className="space-y-4">
+            <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-sm">
+              Seamlessly connect your entire fleet operation with unified, role-based access control.
+            </p>
+            
+            <div className="space-y-5 pt-4">
               {[
                 { name: "Fleet Manager", desc: "Monitors asset statuses and workshop entries." },
                 { name: "Dispatcher", desc: "Schedules route assignments and dispatches." },
                 { name: "Safety Officer", desc: "Audits driving licenses and compliance." },
                 { name: "Financial Analyst", desc: "Tracks expense reports and asset ROI." }
               ].map((item, idx) => (
-                <li key={idx} className="flex items-start space-x-3 group">
-                  <span className="w-2 h-2 rounded-full bg-amber-500 mt-2 shrink-0 group-hover:scale-125 transition-transform" />
-                  <div>
-                    <span className="text-sm font-bold text-slate-800 block">{item.name}</span>
-                    <span className="text-xs text-slate-500 block leading-tight">{item.desc}</span>
+                <div key={idx} className="flex items-start space-x-4 group cursor-default">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0 group-hover:scale-[2] group-hover:bg-indigo-400 transition-all duration-300 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
+                  <div className="transform group-hover:translate-x-2 transition-transform duration-300">
+                    <span className="text-sm font-semibold text-gray-200 block">{item.name}</span>
+                    <span className="text-xs text-gray-500 block leading-tight mt-0.5">{item.desc}</span>
                   </div>
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         </div>
 
-        <div className="relative z-10 mt-12 md:mt-0 text-[10px] text-slate-400 font-medium">
-          TRANSITOPS &copy; 2026. ROLE-BASED ACCESS CONTROL
+        <div className="relative z-10 mt-12 md:mt-0 text-[11px] text-gray-600 font-medium tracking-wider uppercase">
+          &copy; 2026 TransitOps. Secure RBAC Portal.
         </div>
       </div>
 
-      {/* Right panel - Form (Dark style matching wireframe split) */}
-      <div className="w-full md:w-[58%] bg-[#0e1322] border-t md:border-t-0 md:border-l border-slate-900 p-8 md:p-12 flex items-center justify-center relative">
-        <div className="absolute top-1/4 right-1/4 w-80 h-80 bg-indigo-900/10 rounded-full blur-[100px] pointer-events-none" />
+      {/* Right panel - Login Form */}
+      <div className="relative w-full md:w-[55%] flex items-center justify-center p-8 md:p-12">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.02] pointer-events-none"></div>
 
-        <div className="w-full max-w-md space-y-8 z-10">
+        <div className="w-full max-w-[420px] relative z-10 animate-in fade-in zoom-in-95 duration-700 delay-300">
           
-          <div className="space-y-2">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">Sign in to your account</h1>
-            <p className="text-xs text-slate-400">Enter your credentials to continue</p>
-          </div>
-
-          {/* General Alert Box / Lockout banner */}
-          {generalError && (
-            <div className="bg-red-500/10 border border-red-500/35 text-red-200 p-3.5 rounded-lg flex items-start space-x-2.5 text-xs animate-shake">
-              <ShieldAlert className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold block">Sign In Failed</span>
-                <span className="block leading-relaxed mt-0.5">{generalError}</span>
-              </div>
+          {/* Glassmorphism Card */}
+          <div className="bg-[#11151F]/80 backdrop-blur-xl border border-[#23293D] rounded-3xl p-8 md:p-10 shadow-2xl shadow-black/50">
+            
+            <div className="space-y-2 mb-10 text-center">
+              <h1 className="text-3xl font-bold tracking-tight text-white">Welcome back</h1>
+              <p className="text-sm text-gray-400">Sign in to your account to continue</p>
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email Field */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-350 block uppercase tracking-wider">Email Address</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Mail className="h-4 w-4 text-slate-500" />
-                </span>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="manager@transitops.com"
-                  className={`w-full bg-slate-950 border ${
-                    errors.email ? "border-red-500/80 focus:ring-red-500/30" : "border-slate-800 focus:ring-indigo-500/30"
-                  } rounded-lg py-2.5 pl-10 pr-3.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 transition-all`}
-                />
-              </div>
-              {errors.email && (
-                <div className="flex items-center space-x-1 text-red-400 text-[11px] mt-1">
-                  <AlertCircle className="h-3.5 w-3.5" />
-                  <span>{errors.email}</span>
+            {/* General Alert Box */}
+            {generalError && (
+              <div className="mb-6 bg-red-500/10 border border-red-500/30 text-red-200 p-4 rounded-xl flex items-start space-x-3 text-sm animate-in slide-in-from-top-2">
+                <ShieldAlert className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-semibold block">Authentication Failed</span>
+                  <span className="block text-xs mt-1 text-red-300/80">{generalError}</span>
                 </div>
-              )}
-            </div>
-
-            {/* Password Field */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-350 block uppercase tracking-wider">Password</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <Key className="h-4 w-4 text-slate-500" />
-                </span>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className={`w-full bg-slate-950 border ${
-                    errors.password ? "border-red-500/80 focus:ring-red-500/30" : "border-slate-800 focus:ring-indigo-500/30"
-                  } rounded-lg py-2.5 pl-10 pr-3.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 transition-all`}
-                />
               </div>
-              {errors.password && (
-                <div className="flex items-center space-x-1 text-red-400 text-[11px] mt-1">
-                  <AlertCircle className="h-3.5 w-3.5" />
-                  <span>{errors.password}</span>
-                </div>
-              )}
-            </div>
+            )}
 
-            {/* Role Select Dropdown */}
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-350 block uppercase tracking-wider">Role Select</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as Role)}
-                className={`w-full bg-slate-950 border ${
-                  errors.role ? "border-red-500/80 focus:ring-red-500/30" : "border-slate-800 focus:ring-indigo-500/30"
-                } rounded-lg py-2.5 px-3.5 text-xs text-slate-200 focus:outline-none focus:ring-2 transition-all`}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              
+              {/* Email Field */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-gray-400 block uppercase tracking-wider ml-1">Email Address</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-400 text-gray-500">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="manager@transitops.com"
+                    className={`w-full bg-[#0A0C10] border ${
+                      errors.email ? "border-red-500/50 focus:ring-red-500/20" : "border-[#23293D] focus:border-blue-500 focus:ring-blue-500/20"
+                    } rounded-xl py-3 pl-11 pr-4 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-4 transition-all`}
+                  />
+                </div>
+                {errors.email && (
+                  <div className="flex items-center space-x-1.5 text-red-400 text-xs mt-1.5 ml-1 animate-in fade-in">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    <span>{errors.email}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Password Field */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-gray-400 block uppercase tracking-wider ml-1">Password</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-blue-400 text-gray-500">
+                    <Key className="h-4 w-4" />
+                  </div>
+                  <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className={`w-full bg-[#0A0C10] border ${
+                      errors.password ? "border-red-500/50 focus:ring-red-500/20" : "border-[#23293D] focus:border-blue-500 focus:ring-blue-500/20"
+                    } rounded-xl py-3 pl-11 pr-4 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:ring-4 transition-all`}
+                  />
+                </div>
+                {errors.password && (
+                  <div className="flex items-center space-x-1.5 text-red-400 text-xs mt-1.5 ml-1 animate-in fade-in">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    <span>{errors.password}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Role Select Dropdown */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-gray-400 block uppercase tracking-wider ml-1">Select Role</label>
+                <div className="relative">
+                  <select
+                    value={role}
+                    onChange={(e) => setRole(e.target.value as Role)}
+                    className={`w-full bg-[#0A0C10] border ${
+                      errors.role ? "border-red-500/50 focus:ring-red-500/20" : "border-[#23293D] focus:border-blue-500 focus:ring-blue-500/20"
+                    } rounded-xl py-3 px-4 text-sm text-gray-200 focus:outline-none focus:ring-4 transition-all appearance-none cursor-pointer`}
+                  >
+                    <option value="FLEET_MANAGER">Fleet Manager</option>
+                    <option value="DRIVER">Dispatcher / Driver</option>
+                    <option value="SAFETY_OFFICER">Safety Officer</option>
+                    <option value="FINANCIAL_ANALYST">Financial Analyst</option>
+                  </select>
+                  {/* Custom Arrow */}
+                  <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-500">
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
+                </div>
+              </div>
+
+              {/* Remember Me and Forgot Password */}
+              <div className="flex items-center justify-between text-sm pt-2">
+                <label className="flex items-center space-x-3 text-gray-400 select-none cursor-pointer group">
+                  <div className="relative flex items-center justify-center">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="peer appearance-none w-5 h-5 border-2 border-gray-600 rounded-md bg-[#0A0C10] checked:bg-blue-500 checked:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all cursor-pointer"
+                    />
+                    <svg className="absolute w-3 h-3 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                  </div>
+                  <span className="group-hover:text-gray-300 transition-colors">Remember me</span>
+                </label>
+                <a href="#" className="text-blue-400 hover:text-blue-300 font-medium transition-colors">
+                  Forgot password?
+                </a>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="group w-full flex items-center justify-center space-x-2 py-3.5 mt-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 text-white font-semibold rounded-xl text-sm transition-all shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] active:scale-[0.98]"
               >
-                <option value="FLEET_MANAGER">Fleet Manager</option>
-                <option value="DRIVER">Dispatcher / Driver</option>
-                <option value="SAFETY_OFFICER">Safety Officer</option>
-                <option value="FINANCIAL_ANALYST">Financial Analyst</option>
-              </select>
-              {errors.role && (
-                <div className="flex items-center space-x-1 text-red-400 text-[11px] mt-1">
-                  <AlertCircle className="h-3.5 w-3.5" />
-                  <span>{errors.role}</span>
-                </div>
-              )}
-            </div>
+                <span>{isSubmitting ? "Authenticating..." : "Sign In securely"}</span>
+                {!isSubmitting && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+              </button>
+            </form>
 
-            {/* Remember Me and Forgot Password */}
-            <div className="flex items-center justify-between text-xs pt-1">
-              <label className="flex items-center space-x-2 text-slate-400 select-none cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="rounded border-slate-850 bg-slate-950 text-amber-600 focus:ring-amber-500/20"
-                />
-                <span>Remember me</span>
-              </label>
-              <a href="#" className="text-amber-550 hover:text-amber-400 font-semibold transition-colors">
-                Forgot password?
-              </a>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-3 bg-amber-600 hover:bg-amber-550 disabled:bg-amber-800 disabled:opacity-60 text-white font-bold rounded-lg text-xs tracking-wider uppercase transition-all shadow-lg shadow-amber-600/10 active:scale-[0.98] cursor-pointer"
-            >
-              {isSubmitting ? "Signing In..." : "Sign In"}
-            </button>
-          </form>
-
-          {/* Access scoped lists under the login form */}
-          <div className="pt-6 border-t border-slate-900/60 text-[11px] text-slate-400 space-y-2">
-            <span className="font-bold text-slate-350 block">Access is scoped by role after login:</span>
-            <ul className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
-              <li>• <span className="text-slate-450 font-medium">Fleet Manager</span> → Fleet, Maintenance</li>
-              <li>• <span className="text-slate-450 font-medium">Dispatcher</span> → Dashboard, Trips</li>
-              <li>• <span className="text-slate-450 font-medium">Safety Officer</span> → Drivers, Compliance</li>
-              <li>• <span className="text-slate-450 font-medium">Financial Analyst</span> → Fuel & Expenses, Analytics</li>
-            </ul>
           </div>
-          
         </div>
       </div>
     </div>
