@@ -25,24 +25,13 @@ const sidebarItems = [
   { name: 'Settings',       path: '/settings',       icon: Settings },
 ];
 
-const roleAccessMap: Record<string, string[]> = {
-  '/dashboard':    ['FLEET_MANAGER', 'DRIVER', 'SAFETY_OFFICER', 'FINANCIAL_ANALYST'],
-  '/vehicles':     ['FLEET_MANAGER'],
-  '/drivers':      ['SAFETY_OFFICER'],
-  '/trips':        ['DRIVER'],
-  '/maintenance':  ['FLEET_MANAGER'],
-  '/fuel-expenses':['FINANCIAL_ANALYST'],
-  '/analytics':    ['FINANCIAL_ANALYST'],
-  '/settings':     ['FLEET_MANAGER', 'DRIVER', 'SAFETY_OFFICER', 'FINANCIAL_ANALYST'],
-};
-
 interface SidebarProps {
   open?: boolean;
   onClose?: () => void;
 }
 
 export const Sidebar = ({ open, onClose }: SidebarProps) => {
-  const { user, logout } = useAuth();
+  const { user, rbac, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -54,7 +43,8 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
   const userRole = user?.role || 'DRIVER';
 
   const hasAccess = (path: string) => {
-    const allowed = roleAccessMap[path];
+    if (path === '/dashboard' || path === '/settings') return true;
+    const allowed = (rbac || {})[path];
     return allowed ? allowed.includes(userRole) : true;
   };
 
