@@ -82,7 +82,7 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
       {/* Nav */}
       <div className="px-4 flex-1 overflow-y-auto">
         <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-wider mb-3">Overview</p>
-        <nav className="space-y-0.5">
+        <nav className="flex md:flex-col space-x-2 md:space-x-0 md:space-y-0.5 pb-2 md:pb-0">
           {sidebarItems.map((item) => {
             const isActive = location.pathname === item.path;
             const allowed = hasAccess(item.path);

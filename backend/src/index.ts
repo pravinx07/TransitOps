@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import authRoutes from "./modules/auth/auth.routes";
 import vehicleRoutes from "./modules/vehicles/vehicles.routes";
+import driversRoutes from "./modules/drivers/drivers.routes";
 import { sendError } from "./utils/apiResponse";
 
 // Load environment variables
@@ -18,6 +19,7 @@ app.use(express.json());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/drivers", driversRoutes);
 
 // Test Route
 app.get("/health", (req, res) => {
